@@ -54,15 +54,22 @@ class GameFragment : Fragment() {
         // if any change in the configration happen the viewModelProvider will insure that your ViewModel will not delete and when the fragment create again it will link it to the previous created instance
         // After the Activity/Fragment finish and be deleted it will also delete the gameViewModel associated to it
         gameViewModel = ViewModelProvider(this).get(GameViewModel::class.java)
-
+        //Observers
         gameViewModel.word.observe(viewLifecycleOwner, Observer { wordVal ->
             updateWordText(wordVal)
         })
-        gameViewModel.score.observe(viewLifecycleOwner, Observer {score->
+        gameViewModel.score.observe(viewLifecycleOwner, Observer { score ->
             updateScoreText(score.toString())
 
         })
 
+        gameViewModel.onFinishNavigateEvent.observe(viewLifecycleOwner, Observer { hasFinish ->
+            if(hasFinish){
+                gameFinished()
+                gameViewModel.finishedGame()
+            }
+
+        })
         binding.correctButton.setOnClickListener { onCorrect() }
         binding.skipButton.setOnClickListener { onSkip() }
 
@@ -85,21 +92,11 @@ class GameFragment : Fragment() {
     private fun onSkip() {
         Log.i("GameFragment", "onSkip")
         gameViewModel.skip()
-        if (gameViewModel.getListWord().isEmpty()) {
-            gameFinished()
-        } else {
-
-        }
     }
 
     private fun onCorrect() {
         Log.i("GameFragment", "onCorrect")
         gameViewModel.correct()
-
-        if (gameViewModel.getListWord().isEmpty()) {
-            gameFinished()
-        } else {
-        }
     }
 
     /** Methods for updating the UI **/
@@ -108,7 +105,7 @@ class GameFragment : Fragment() {
         binding.wordText.text = word_val
     }
 
-    private fun updateScoreText(score:String) {
+    private fun updateScoreText(score: String) {
         binding.scoreText.text = score
     }
 }
