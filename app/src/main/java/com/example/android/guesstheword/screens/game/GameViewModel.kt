@@ -1,15 +1,27 @@
 package com.example.android.guesstheword.screens.game
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class GameViewModel : ViewModel() {
     // The current word
-    var word = MutableLiveData<String>()
+    val _word = MutableLiveData<String>()
+    val word: LiveData<String>
+        get() = _word
 
     // The current score
-    var score = MutableLiveData<Int>()
+    //I want to encapsulate the value of scrore so the that it can't be access from outside of the class
+
+    val _score = MutableLiveData<Int>()
+    val score: LiveData<Int>
+        get() = _score
+
+    val _onFinishNavigateEvent = MutableLiveData<Boolean>()
+    val onFinishNavigateEvent: LiveData<Boolean>
+        get() = _onFinishNavigateEvent
+
 
     // The list of words - the front of the list is the next word to guess
     lateinit var wordList: MutableList<String>
@@ -17,8 +29,9 @@ class GameViewModel : ViewModel() {
     init {
         resetList()
         nextWord()
-        word.value=""
-        score.value=0
+        _word.value = ""
+        _score.value = 0
+        _onFinishNavigateEvent.value = false
         Log.i("GameViewModel", "call instructor")
 
     }
@@ -63,34 +76,25 @@ class GameViewModel : ViewModel() {
      */
     fun nextWord() {
         //Select and remove a word from the list
-        if (!wordList.isEmpty()) {
-            word.value = wordList.removeAt(0)
+        if (wordList.isEmpty()) {
+            _onFinishNavigateEvent.value = true
+        } else {
+            _word.value = wordList.removeAt(0)
         }
-//        updateWord()
-//        updateScore()
-    }
-
-//    fun getScore(): String {
-//        return score.toString()
-//    }
-
-//    fun getResult(): String {
-//        return word
-//    }
-
-    fun getListWord(): MutableList<String> {
-        return wordList
     }
 
     fun skip() {
-        score.value= score.value?.minus(1)
+        _score.value = score.value?.minus(1)
         nextWord()
     }
 
     fun correct() {
-        score.value= score.value?.plus(1)
+        _score.value = score.value?.plus(1)
         nextWord()
     }
 
+    fun finishedGame(){
+        _onFinishNavigateEvent.value = false
+    }
 
 }
